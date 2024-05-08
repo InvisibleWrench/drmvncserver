@@ -67,9 +67,6 @@ __ __| |           |  /_) |     ___|             |           |\n\
 #define ALIGN_UP(x,y)  ((x + (y)-1) & ~((y)-1))
 #endif
 
-#define ERR(fmt, ...) fprintf(stderr, LOG_PREFIX fmt "\n", ##__VA_ARGS__)
-#define MSG(fmt, ...) fprintf(stdout, LOG_PREFIX fmt "\n", ##__VA_ARGS__)
-
 // #define CHANNELS_PER_PIXEL 4
 
 static char fb_device[256] = "/dev/fb0";
