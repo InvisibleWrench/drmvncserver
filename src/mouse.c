@@ -20,7 +20,7 @@
 #include "rfb/rfb.h"
 
 #include "mouse.h"
-#include "logging.h"
+#include "tklog.h"
 
 
 
@@ -55,17 +55,17 @@ int init_mouse(const char *touch_device, int vnc_rotate)
 	/* Clean evtype_bitmask structure */
 	memset(evtype_bitmask, 0, sizeof(evtype_bitmask));
 
-    MSG("Initializing mouse device %s ...\n", touch_device);
+    tklog_info("Initializing mouse device %s ...\n", touch_device);
     struct input_absinfo info;
     if ((mousefd = open(touch_device, O_RDWR)) == -1)
     {
-        ERR("cannot open mouse device %s\n", touch_device);
+        tklog_error("cannot open mouse device %s\n", touch_device);
         return 0;
     }
 
 	//REL_WHEEL_HI_RES
 	if (ioctl(mousefd, EVIOCGBIT(EV_REL, sizeof(evtype_bitmask)), evtype_bitmask) < 0) {
-		ERR("%s  can't get evdev features: %s",touch_device, strerror(errno));
+		tklog_error("%s  can't get evdev features: %s",touch_device, strerror(errno));
 		return 0;
 	}
 
@@ -74,7 +74,7 @@ int init_mouse(const char *touch_device, int vnc_rotate)
     int offset = REL_WHEEL_HI_RES - (index*32);
 	if(CHECK_BIT(evtype_bitmask[index],offset))
 	{
-		MSG("%s has hi res wheel.\n",touch_device);
+		tklog_info("%s has hi res wheel.\n",touch_device);
 		is_wheel_hires = true;
 	}
 #endif 
@@ -82,21 +82,21 @@ int init_mouse(const char *touch_device, int vnc_rotate)
     // Get the Range of X and Y
     if (ioctl(mousefd, EVIOCGABS(ABS_X), &info))
     {
-        ERR("cannot get ABS_X info, %s\n", strerror(errno));
+        tklog_error("cannot get ABS_X info, %s\n", strerror(errno));
         return 0;
     }
     xmin = info.minimum;
     xmax = info.maximum;
     if (ioctl(mousefd, EVIOCGABS(ABS_Y), &info))
     {
-        ERR("cannot get ABS_Y, %s\n", strerror(errno));
+        tklog_error("cannot get ABS_Y, %s\n", strerror(errno));
         return 0;
     }
     ymin = info.minimum;
     ymax = info.maximum;
     rotate = vnc_rotate;
 
-    MSG("  x:(%d %d)  y:(%d %d) \n", xmin, xmax, ymin, ymax);
+    tklog_info("  x:(%d %d)  y:(%d %d) \n", xmin, xmax, ymin, ymax);
     return 1;
 }
 
@@ -183,9 +183,9 @@ void injectMouseEvent(struct fb_var_screeninfo *scrinfo, int buttonMask, int x, 
                 ev.value = isPressed;
                 if (write(mousefd, &ev, sizeof(ev)) < 0)
                 {
-                    ERR("write event failed, %s\n", strerror(errno));
+                    tklog_error("write event failed, %s\n", strerror(errno));
                 }
-                MSG("Button %s=%04X\n",mouseButtonMap[bi].name, mouseButtonMap[bi].value);
+                tklog_info("Button %s=%04X\n",mouseButtonMap[bi].name, mouseButtonMap[bi].value);
             }
         }
         
@@ -209,20 +209,20 @@ void injectMouseEvent(struct fb_var_screeninfo *scrinfo, int buttonMask, int x, 
 			{
 #ifdef REL_WHEEL_HI_RES
 
-				MSG("HI RES WHEEL %d\n", wheel_tick);
+				tklog_info("HI RES WHEEL %d\n", wheel_tick);
             	ev.code = REL_WHEEL_HI_RES;
             	ev.value = wheel_tick*120;
 #endif 
 			}
 			else
 			{
-				MSG("WHEEL %d\n", wheel_tick);
+				tklog_info("WHEEL %d\n", wheel_tick);
     	        ev.code = REL_WHEEL;
         	    ev.value = wheel_tick;
 			}	
             if (write(mousefd, &ev, sizeof(ev)) < 0)
             {
-                ERR("write event failed, %s\n", strerror(errno));
+                tklog_error("write event failed, %s\n", strerror(errno));
             }
 			last_wheel_tick = wheel_tick;
             wheel_tick = 0;
@@ -244,7 +244,7 @@ void injectMouseEvent(struct fb_var_screeninfo *scrinfo, int buttonMask, int x, 
         ev.value = x;
         if (write(mousefd, &ev, sizeof(ev)) < 0)
         {
-            ERR("write event failed, %s\n", strerror(errno));
+            tklog_error("write event failed, %s\n", strerror(errno));
         }
         last_x = x;
     }
@@ -260,7 +260,7 @@ void injectMouseEvent(struct fb_var_screeninfo *scrinfo, int buttonMask, int x, 
         ev.value = y;
         if (write(mousefd, &ev, sizeof(ev)) < 0)
         {
-            ERR("write event failed, %s\n", strerror(errno));
+            tklog_error("write event failed, %s\n", strerror(errno));
         }
         last_y = y;
     }
@@ -274,7 +274,7 @@ void injectMouseEvent(struct fb_var_screeninfo *scrinfo, int buttonMask, int x, 
     ev.value = 0;
     if (write(mousefd, &ev, sizeof(ev)) < 0)
     {
-        ERR("write event failed, %s\n", strerror(errno));
+        tklog_error("write event failed, %s\n", strerror(errno));
     }
-    MSG("injectMouseEvent (screen(%d,%d) -> mouse(%d,%d), button=%d, wheel tick=%d)\n", xin, yin, x, y, buttonMask, last_wheel_tick);
+    tklog_debug("injectMouseEvent (screen(%d,%d) -> mouse(%d,%d), button=%d, wheel tick=%d)\n", xin, yin, x, y, buttonMask, last_wheel_tick);
 }
