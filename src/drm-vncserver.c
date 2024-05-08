@@ -390,7 +390,7 @@ by a press and release of button 4, and each step downwards is represented by
 a press and release of button 5.
   From: http://www.vislab.usyd.edu.au/blogs/index.php/2009/05/22/an-headerless-indexed-protocol-for-input-1?blog=61 */
 
-    //tklog_debug("Got ptrevent touch: %04x (x=%d, y=%d)\n", buttonMask, x, y);
+    //debug_print("Got ptrevent touch: %04x (x=%d, y=%d)\n", buttonMask, x, y);
     // Simulate left mouse event as touch event
 
     
@@ -429,7 +429,7 @@ by a press and release of button 4, and each step downwards is represented by
 a press and release of button 5.
   From: http://www.vislab.usyd.edu.au/blogs/index.php/2009/05/22/an-headerless-indexed-protocol-for-input-1?blog=61 */
 
-  //  tklog_debug("Got mouse: %04x (x=%d, y=%d)\n", buttonMask, x, y);
+  //  debug_print("Got mouse: %04x (x=%d, y=%d)\n", buttonMask, x, y);
     // Simulate left mouse event as touch event
     injectMouseEvent(&var_scrinfo, buttonMask, x, y);
 }
