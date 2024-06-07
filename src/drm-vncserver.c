@@ -207,11 +207,11 @@ static void init_drmFB(void)
     drmfd = open(drmFB_device, O_RDWR | O_CLOEXEC);
     if (drmfd < 0)
     {
-        error_print("Unable to open DRM device %s.\n",drmFB_device);
+        error_print("Unable to open DRM device %c.\n",drmFB_device);
         exit(EXIT_FAILURE);
     }
 
-    info_print("DRM device %s sucessfully opened.\n",drmFB_device);
+    info_print("DRM device %c sucessfully opened.\n",drmFB_device);
 
     // retrieve device resources
     drmRes = drmModeGetResources(drmfd);
@@ -247,7 +247,7 @@ static void init_drmFB(void)
     info_print("(ht: %u hs: %u he: %u hskew: %u, vt: %u  vs: %u ve: %u vscan: %u, flags: 0x%X %s)\n",
                 drmResolution->htotal, drmResolution->hsync_start, drmResolution->hsync_end, drmResolution->hskew,
                 drmResolution->vtotal, drmResolution->vsync_start, drmResolution->vsync_end, drmResolution->vscan,
-                drmResolution->flags, drmResolution->type & DRM_MODE_TYPE_PREFerror_printED ? "<P>":"");
+                drmResolution->flags, drmResolution->type & DRM_MODE_TYPE_PREFERRED ? "<P>":"");
 
 
     drmEncoder = drmModeGetEncoder(drmfd, drmConnector->encoder_id);
@@ -321,7 +321,7 @@ static void init_fb(void)
         error_print("cannot open fb device %s\n", fb_device);
         exit(EXIT_FAILURE);
     }
-    info_print("FB device %s successfully opened.\n");
+    info_print("FB device successfully opened.\n");
 
 
     if (ioctl(fbfd, FBIOGET_VSCREENINFO, &var_scrinfo) != 0) {
