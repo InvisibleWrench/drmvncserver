@@ -217,7 +217,7 @@ static void init_drmFB(void)
     drmRes = drmModeGetResources(drmfd);
     if (!drmRes)
     {
-        error_print("Unable to retrieve DRM resources (%d).\n");
+        error_print("Unable to retrieve DRM resources (%d).\n", 1);
         exit(EXIT_FAILURE);
     }
 
@@ -252,13 +252,13 @@ static void init_drmFB(void)
 
     drmEncoder = drmModeGetEncoder(drmfd, drmConnector->encoder_id);
     if (!drmEncoder) {
-        error_print("Unable to drmModeGetEncoder (%d).\n");
+        error_print("Unable to drmModeGetEncoder (%d).\n", 2);
         exit(EXIT_FAILURE);
     }
 
     drmCrtc = drmModeGetCrtc(drmfd,drmEncoder->crtc_id);
     if (!drmCrtc) {
-        error_print("Unable to drmModeGetCrtc (%d).\n");
+        error_print("Unable to drmModeGetCrtc (%d).\n", 3);
         exit(EXIT_FAILURE);           
     }
 
@@ -283,7 +283,7 @@ static void init_drmFB(void)
     dumb_map.offset = 0;
 
     if ( drmIoctl(drmfd, DRM_IOCTL_MODE_MAP_DUMB, &dumb_map) != 0 ) {
-        error_print("DRM_IOCTL_MODE_MAP_DUMB failed (error_print=%d)\n");
+        error_print("DRM_IOCTL_MODE_MAP_DUMB failed (error_print=%d)\n", 4);
         exit(EXIT_FAILURE);
     }
  
@@ -296,7 +296,7 @@ static void init_drmFB(void)
 
     DRM_FrameBuffer = mmap(0, FrameBufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, drmfd, dumb_map.offset);
     if (DRM_FrameBuffer == MAP_FAILED) {
-        error_print("DRM frame buffer mmap failed (error_print=%d)\n");
+        error_print("DRM frame buffer mmap failed (error_print=%d)\n", 5);
         exit(EXIT_FAILURE);
     }
     info_print("DRM frame buffer map of %u bytes allocated at %p.\n",FrameBufferSize,DRM_FrameBuffer);
