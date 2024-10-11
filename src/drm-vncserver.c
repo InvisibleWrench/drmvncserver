@@ -834,8 +834,8 @@ int main(int argc, char **argv)
         rfbRunEventLoop(RFB_Server, -1, TRUE);
         while (rfbIsActive(RFB_Server) )
         {
-            // if ( RFB_Server->clientHead != NULL ) update_screen32();
-            if ( RFB_Server->clientHead != NULL ) update_screen16();
+            if ( RFB_Server->clientHead != NULL ) update_screen32();
+            // if ( RFB_Server->clientHead != NULL ) update_screen16();
             else if (Target_fps > 0) usleep(1000 * 1000 / Target_fps);
             usleep(10 * 1000);   
         }
