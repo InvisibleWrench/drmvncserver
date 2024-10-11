@@ -481,10 +481,6 @@ static void init_fb_server(int argc, char **argv, rfbBool enable_touch, rfbBool 
     RFB_Server->serverFormat.redMax       = 31 ;
     RFB_Server->serverFormat.greenMax     = 63 ;
     RFB_Server->serverFormat.blueMax      = 31 ; 
- 
-    // RFB_Server->serverFormat.redShift     = 11 ;
-    // RFB_Server->serverFormat.greenShift   = 5 ;
-    // RFB_Server->serverFormat.blueShift    = 0 ;  
     
     // Rotation adjustments
     switch (VNC_rotate) {
@@ -784,7 +780,7 @@ int main(int argc, char **argv)
 
     if (FrameBuffer_BitsPerPixel != 32) {
         error_print("Only 32 bits framebuffer is supported. Current Bits Per Pixel is %d.\n",FrameBuffer_BitsPerPixel);
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
 
    
