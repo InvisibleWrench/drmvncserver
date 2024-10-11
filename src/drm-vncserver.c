@@ -598,8 +598,8 @@ static void update_screen32()
 
 static void update_screen16()  // Modified for 16-bit (RGB565)
 {
-    uint16_t *f = (uint16_t *)DRM_FrameBuffer;  // Source framebuffer in RGB565
-    uint16_t *c = (uint16_t *)CMP_FrameBuffer;  // Compare framebuffer in RGB565
+    uint32_t *f = (uint32_t *)DRM_FrameBuffer;  // Source framebuffer (32-bit aligned, RGB565 data)
+    uint32_t *c = (uint32_t *)CMP_FrameBuffer;  // Comparison framebuffer (32-bit aligned)
     uint8_t *r = (uint8_t *)RFB_FrameBuffer;    // Destination framebuffer in RGB888
 
     minX = RFB_Server->width - 1; 
@@ -614,11 +614,13 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
         for (uint16_t y = 0; y < FrameBuffer_Yheight; y++) {
             destOffset = 0;    
             for (uint16_t x = 0; x < FrameBuffer_Xwidth; x++) {
-                if (*f != *c) {      
+                // Read the 16-bit RGB565 value from the 32-bit aligned data
+                uint16_t rgb565_pixel = (uint16_t)(*f & 0xFFFF);
+
+                if (rgb565_pixel != (uint16_t)(*c & 0xFFFF)) {      
                     *c = *f; 
 
                     // Convert RGB565 to RGB888
-                    uint16_t rgb565_pixel = *f;
                     uint8_t red = (rgb565_pixel >> 11) & 0x1F;
                     uint8_t green = (rgb565_pixel >> 5) & 0x3F;
                     uint8_t blue = rgb565_pixel & 0x1F;
@@ -647,9 +649,11 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
     else {
         for (uint16_t y = 0; y < FrameBuffer_Yheight; y++) {
             for (uint16_t x = 0; x < FrameBuffer_Xwidth; x++) {
-                if (*f != *c) {      
+                // Read the 16-bit RGB565 value from the 32-bit aligned data
+                uint16_t rgb565_pixel = (uint16_t)(*f & 0xFFFF);
+
+                if (rgb565_pixel != (uint16_t)(*c & 0xFFFF)) {      
                     // Convert RGB565 to RGB888
-                    uint16_t rgb565_pixel = *f;
                     uint8_t red = (rgb565_pixel >> 11) & 0x1F;
                     uint8_t green = (rgb565_pixel >> 5) & 0x3F;
                     uint8_t blue = rgb565_pixel & 0x1F;
@@ -677,7 +681,6 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
     
     rfbMarkRectAsModified(RFB_Server, minX, minY, maxX, maxY);
 }
-
 
 /*****************************************************************************/
 
