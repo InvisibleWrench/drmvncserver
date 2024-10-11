@@ -461,18 +461,30 @@ static void init_fb_server(int argc, char **argv, rfbBool enable_touch, rfbBool 
     if (enable_mouse) RFB_Server->ptrAddEvent = ptrevent_mouse; 
     
     // Set PixelFormat for server
-    RFB_Server->serverFormat.bitsPerPixel = FrameBuffer_BitsPerPixel ;
-    RFB_Server->serverFormat.depth        = FrameBuffer_Depth ;
-    RFB_Server->serverFormat.bigEndian    = 0 ;
-    RFB_Server->serverFormat.trueColour   = 1 ;
-    RFB_Server->serverFormat.redMax       = 0x00FF ;
-    RFB_Server->serverFormat.greenMax     = 0x00FF ;
-    RFB_Server->serverFormat.blueMax      = 0x00FF ; 
-    RFB_Server->serverFormat.blueMax      = 0x00FF ;
+    // RFB_Server->serverFormat.bitsPerPixel = FrameBuffer_BitsPerPixel ;
+    // RFB_Server->serverFormat.depth        = FrameBuffer_Depth ;
+    // RFB_Server->serverFormat.bigEndian    = 0 ;
+    // RFB_Server->serverFormat.trueColour   = 1 ;
+    // RFB_Server->serverFormat.redMax       = 0x00FF ;
+    // RFB_Server->serverFormat.greenMax     = 0x00FF ;
+    // RFB_Server->serverFormat.blueMax      = 0x00FF ;
  
-    RFB_Server->serverFormat.redShift     = var_scrinfo.red.offset ;
-    RFB_Server->serverFormat.greenShift   = var_scrinfo.green.offset ;
-    RFB_Server->serverFormat.blueShift    = var_scrinfo.blue.offset ;  
+    // RFB_Server->serverFormat.redShift     = var_scrinfo.red.offset ;
+    // RFB_Server->serverFormat.greenShift   = var_scrinfo.green.offset ;
+    // RFB_Server->serverFormat.blueShift    = var_scrinfo.blue.offset ;  
+
+
+    RFB_Server->serverFormat.bitsPerPixel = 16 ;
+    RFB_Server->serverFormat.depth        = 16 ;
+    RFB_Server->serverFormat.bigEndian    = 0 ;
+    RFB_Server->serverFormat.trueColour   = 0 ;
+    RFB_Server->serverFormat.redMax       = 31 ;
+    RFB_Server->serverFormat.greenMax     = 63 ;
+    RFB_Server->serverFormat.blueMax      = 61 ; 
+ 
+    RFB_Server->serverFormat.redShift     = 11 ;
+    RFB_Server->serverFormat.greenShift   = 5 ;
+    RFB_Server->serverFormat.blueShift    = 0 ;  
     
     // Rotation adjustments
     switch (VNC_rotate) {
@@ -579,6 +591,93 @@ static void update_screen32()
     
     rfbMarkRectAsModified(RFB_Server, minX, minY, maxX,maxY );
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// VNC UPDATE SCREEN - 16 bits per pixel
+///////////////////////////////////////////////////////////////////////////////
+
+static void update_screen16()  // Modified for 16-bit (RGB565)
+{
+    uint16_t *f = (uint16_t *)DRM_FrameBuffer;  // Source framebuffer in RGB565
+    uint16_t *c = (uint16_t *)CMP_FrameBuffer;  // Compare framebuffer in RGB565
+    uint8_t *r = (uint8_t *)RFB_FrameBuffer;    // Destination framebuffer in RGB888
+
+    minX = RFB_Server->width - 1; 
+    minY = RFB_Server->height - 1; 
+    maxX = maxY = 0; 
+ 
+    uint16_t x2, y2;
+    uint32_t destOffset;    
+    uint8_t Changed = 0;
+
+    if (VNC_rotate == 90) {
+        for (uint16_t y = 0; y < FrameBuffer_Yheight; y++) {
+            destOffset = 0;    
+            for (uint16_t x = 0; x < FrameBuffer_Xwidth; x++) {
+                if (*f != *c) {      
+                    *c = *f; 
+
+                    // Convert RGB565 to RGB888
+                    uint16_t rgb565_pixel = *f;
+                    uint8_t red = (rgb565_pixel >> 11) & 0x1F;
+                    uint8_t green = (rgb565_pixel >> 5) & 0x3F;
+                    uint8_t blue = rgb565_pixel & 0x1F;
+
+                    // Scale to 8-bit values
+                    uint8_t red_8bit = (red << 3) | (red >> 2);
+                    uint8_t green_8bit = (green << 2) | (green >> 4);
+                    uint8_t blue_8bit = (blue << 3) | (blue >> 2);
+
+                    x2 = FrameBuffer_Yheight - 1 - y;
+                    y2 = x;
+
+                    // Populate the RGB888 buffer
+                    r[(destOffset + x2) * 3 + 0] = red_8bit;
+                    r[(destOffset + x2) * 3 + 1] = green_8bit;
+                    r[(destOffset + x2) * 3 + 2] = blue_8bit;
+
+                    update_rec(x2, y2);
+                    Changed = 1;
+                }
+                destOffset += RFB_Server->width;
+                f++; c++;
+            }   
+        }
+    } 
+    else {
+        for (uint16_t y = 0; y < FrameBuffer_Yheight; y++) {
+            for (uint16_t x = 0; x < FrameBuffer_Xwidth; x++) {
+                if (*f != *c) {      
+                    // Convert RGB565 to RGB888
+                    uint16_t rgb565_pixel = *f;
+                    uint8_t red = (rgb565_pixel >> 11) & 0x1F;
+                    uint8_t green = (rgb565_pixel >> 5) & 0x3F;
+                    uint8_t blue = rgb565_pixel & 0x1F;
+
+                    // Scale to 8-bit values
+                    uint8_t red_8bit = (red << 3) | (red >> 2);
+                    uint8_t green_8bit = (green << 2) | (green >> 4);
+                    uint8_t blue_8bit = (blue << 3) | (blue >> 2);
+
+                    // Populate the RGB888 buffer
+                    *r++ = red_8bit;
+                    *r++ = green_8bit;
+                    *r++ = blue_8bit;
+
+                    *c = *f;
+                    update_rec(x, y);
+                    Changed = 1;
+                }
+                f++; c++;
+            }   
+        }
+    }
+    
+    if (!Changed) return;
+    
+    rfbMarkRectAsModified(RFB_Server, minX, minY, maxX, maxY);
+}
+
 
 /*****************************************************************************/
 
@@ -728,14 +827,15 @@ int main(int argc, char **argv)
         rfbRunEventLoop(RFB_Server, -1, TRUE);
         while (rfbIsActive(RFB_Server) )
         {
-            if ( RFB_Server->clientHead != NULL ) update_screen32();
+            // if ( RFB_Server->clientHead != NULL ) update_screen32();
+            if ( RFB_Server->clientHead != NULL ) update_screen16();
             else if (Target_fps > 0) usleep(1000 * 1000 / Target_fps);
             usleep(10 * 1000);   
         }
     }
  
     info_print("Cleaning up things...\n");
-     close(drmfd);
+    close(drmfd);
     cleanup_kbd();
     cleanup_touch();
 }
