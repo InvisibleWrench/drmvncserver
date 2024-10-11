@@ -609,16 +609,19 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
     uint16_t x2, y2;
     uint32_t destOffset;    
     uint8_t Changed = 0;
+    
+    // Use the pitch value for each row
+    int pitch = 4096 / sizeof(uint32_t);  // Calculate the pitch in terms of 32-bit units
 
     if (VNC_rotate == 90) {
         for (uint16_t y = 0; y < FrameBuffer_Yheight; y++) {
             destOffset = 0;    
             for (uint16_t x = 0; x < FrameBuffer_Xwidth; x++) {
                 // Read the 16-bit RGB565 value from the 32-bit aligned data
-                uint16_t rgb565_pixel = (uint16_t)(*f & 0xFFFF);
+                uint16_t rgb565_pixel = (uint16_t)(f[x] & 0xFFFF);
 
-                if (rgb565_pixel != (uint16_t)(*c & 0xFFFF)) {      
-                    *c = *f; 
+                if (rgb565_pixel != (uint16_t)(c[x] & 0xFFFF)) {      
+                    c[x] = f[x]; 
 
                     // Convert RGB565 to RGB888
                     uint8_t red = (rgb565_pixel >> 11) & 0x1F;
@@ -642,17 +645,19 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
                     Changed = 1;
                 }
                 destOffset += RFB_Server->width;
-                f++; c++;
             }   
+            // Move to the next row based on the pitch
+            f += pitch;
+            c += pitch;
         }
     } 
     else {
         for (uint16_t y = 0; y < FrameBuffer_Yheight; y++) {
             for (uint16_t x = 0; x < FrameBuffer_Xwidth; x++) {
                 // Read the 16-bit RGB565 value from the 32-bit aligned data
-                uint16_t rgb565_pixel = (uint16_t)(*f & 0xFFFF);
+                uint16_t rgb565_pixel = (uint16_t)(f[x] & 0xFFFF);
 
-                if (rgb565_pixel != (uint16_t)(*c & 0xFFFF)) {      
+                if (rgb565_pixel != (uint16_t)(c[x] & 0xFFFF)) {      
                     // Convert RGB565 to RGB888
                     uint8_t red = (rgb565_pixel >> 11) & 0x1F;
                     uint8_t green = (rgb565_pixel >> 5) & 0x3F;
@@ -668,12 +673,14 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
                     *r++ = green_8bit;
                     *r++ = blue_8bit;
 
-                    *c = *f;
+                    c[x] = f[x];
                     update_rec(x, y);
                     Changed = 1;
                 }
-                f++; c++;
             }   
+            // Move to the next row based on the pitch
+            f += pitch;
+            c += pitch;
         }
     }
     
@@ -681,6 +688,7 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
     
     rfbMarkRectAsModified(RFB_Server, minX, minY, maxX, maxY);
 }
+
 
 /*****************************************************************************/
 
