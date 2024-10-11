@@ -55,16 +55,16 @@ __ __| |           |  /_) |     ___|             |           |\n\
 
 #define LOG_FPS
 
-#define BITS_PER_SAMPLE 8
-#define SAMPLES_PER_PIXEL 3
+#define BITS_PER_SAMPLE 5
+#define SAMPLES_PER_PIXEL 2
 //#define COLOR_MASK  0x1f001f
-#define COLOR_MASK (((1UL << BITS_PER_SAMPLE) << 1) - 1)
-#define PIXEL_FB_TO_RFB(p, r_offset, g_offset, b_offset) \
-    ((p >> r_offset) & COLOR_MASK) | (((p >> g_offset) & COLOR_MASK) << BITS_PER_SAMPLE) | (((p >> b_offset) & COLOR_MASK) << (2 * BITS_PER_SAMPLE))
+// #define COLOR_MASK (((1UL << BITS_PER_SAMPLE) << 1) - 1)
+// #define PIXEL_FB_TO_RFB(p, r_offset, g_offset, b_offset) \
+//     ((p >> r_offset) & COLOR_MASK) | (((p >> g_offset) & COLOR_MASK) << BITS_PER_SAMPLE) | (((p >> b_offset) & COLOR_MASK) << (2 * BITS_PER_SAMPLE))
 
-#ifndef ALIGN_UP
-#define ALIGN_UP(x,y)  ((x + (y)-1) & ~((y)-1))
-#endif
+// #ifndef ALIGN_UP
+// #define ALIGN_UP(x,y)  ((x + (y)-1) & ~((y)-1))
+// #endif
 
 // #define CHANNELS_PER_PIXEL 4
 
