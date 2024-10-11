@@ -461,30 +461,30 @@ static void init_fb_server(int argc, char **argv, rfbBool enable_touch, rfbBool 
     if (enable_mouse) RFB_Server->ptrAddEvent = ptrevent_mouse; 
     
     // Set PixelFormat for server
-    // RFB_Server->serverFormat.bitsPerPixel = FrameBuffer_BitsPerPixel ;
-    // RFB_Server->serverFormat.depth        = FrameBuffer_Depth ;
-    // RFB_Server->serverFormat.bigEndian    = 0 ;
-    // RFB_Server->serverFormat.trueColour   = 1 ;
+    RFB_Server->serverFormat.bitsPerPixel = FrameBuffer_BitsPerPixel ;
+    RFB_Server->serverFormat.depth        = FrameBuffer_Depth ;
+    RFB_Server->serverFormat.bigEndian    = 0 ;
+    RFB_Server->serverFormat.trueColour   = 1 ;
     // RFB_Server->serverFormat.redMax       = 0x00FF ;
     // RFB_Server->serverFormat.greenMax     = 0x00FF ;
     // RFB_Server->serverFormat.blueMax      = 0x00FF ;
  
-    // RFB_Server->serverFormat.redShift     = var_scrinfo.red.offset ;
-    // RFB_Server->serverFormat.greenShift   = var_scrinfo.green.offset ;
-    // RFB_Server->serverFormat.blueShift    = var_scrinfo.blue.offset ;  
+    RFB_Server->serverFormat.redShift     = var_scrinfo.red.offset ;
+    RFB_Server->serverFormat.greenShift   = var_scrinfo.green.offset ;
+    RFB_Server->serverFormat.blueShift    = var_scrinfo.blue.offset ;  
 
 
-    RFB_Server->serverFormat.bitsPerPixel = 16 ;
-    RFB_Server->serverFormat.depth        = 16 ;
-    RFB_Server->serverFormat.bigEndian    = 0 ;
-    RFB_Server->serverFormat.trueColour   = 0 ;
+    // RFB_Server->serverFormat.bitsPerPixel = 16 ;
+    // RFB_Server->serverFormat.depth        = 16 ;
+    // RFB_Server->serverFormat.bigEndian    = 0 ;
+    // RFB_Server->serverFormat.trueColour   = 0 ;
     RFB_Server->serverFormat.redMax       = 31 ;
     RFB_Server->serverFormat.greenMax     = 63 ;
-    RFB_Server->serverFormat.blueMax      = 61 ; 
+    RFB_Server->serverFormat.blueMax      = 31 ; 
  
-    RFB_Server->serverFormat.redShift     = 11 ;
-    RFB_Server->serverFormat.greenShift   = 5 ;
-    RFB_Server->serverFormat.blueShift    = 0 ;  
+    // RFB_Server->serverFormat.redShift     = 11 ;
+    // RFB_Server->serverFormat.greenShift   = 5 ;
+    // RFB_Server->serverFormat.blueShift    = 0 ;  
     
     // Rotation adjustments
     switch (VNC_rotate) {
