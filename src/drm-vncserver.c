@@ -619,22 +619,22 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
                 if (rgb565_pixel != (uint16_t)(c[x] & 0xFFFF)) {      
                     c[x] = f[x]; 
 
-                    // Convert RGB565 to RGB888
-                    uint8_t red = (rgb565_pixel >> 11) & 0x1F;
-                    uint8_t green = (rgb565_pixel >> 5) & 0x3F;
+                    // Convert RGB565 to GRB888
+                    uint8_t green = (rgb565_pixel >> 11) & 0x1F;
+                    uint8_t red = (rgb565_pixel >> 5) & 0x3F;
                     uint8_t blue = rgb565_pixel & 0x1F;
 
                     // Scale to 8-bit values
-                    uint8_t red_8bit = (red << 3) | (red >> 2);
-                    uint8_t green_8bit = (green << 2) | (green >> 4);
+                    uint8_t green_8bit = (green << 3) | (green >> 2);
+                    uint8_t red_8bit = (red << 2) | (red >> 4);
                     uint8_t blue_8bit = (blue << 3) | (blue >> 2);
 
                     x2 = FrameBuffer_Yheight - 1 - y;
                     y2 = x;
 
-                    // Populate the RGB888 buffer
-                    r[(destOffset + x2) * 3 + 0] = red_8bit;
-                    r[(destOffset + x2) * 3 + 1] = green_8bit;
+                    // Populate the GRB888 buffer
+                    r[(destOffset + x2) * 3 + 0] = green_8bit;
+                    r[(destOffset + x2) * 3 + 1] = red_8bit;
                     r[(destOffset + x2) * 3 + 2] = blue_8bit;
 
                     update_rec(x2, y2);
@@ -654,19 +654,19 @@ static void update_screen16()  // Modified for 16-bit (RGB565)
                 uint16_t rgb565_pixel = (uint16_t)(f[x] & 0xFFFF);
 
                 if (rgb565_pixel != (uint16_t)(c[x] & 0xFFFF)) {      
-                    // Convert RGB565 to RGB888
-                    uint8_t red = (rgb565_pixel >> 11) & 0x1F;
-                    uint8_t green = (rgb565_pixel >> 5) & 0x3F;
+                    // Convert RGB565 to GRB888
+                    uint8_t green = (rgb565_pixel >> 11) & 0x1F;
+                    uint8_t red = (rgb565_pixel >> 5) & 0x3F;
                     uint8_t blue = rgb565_pixel & 0x1F;
 
                     // Scale to 8-bit values
-                    uint8_t red_8bit = (red << 3) | (red >> 2);
-                    uint8_t green_8bit = (green << 2) | (green >> 4);
+                    uint8_t green_8bit = (green << 3) | (green >> 2);
+                    uint8_t red_8bit = (red << 2) | (red >> 4);
                     uint8_t blue_8bit = (blue << 3) | (blue >> 2);
 
-                    // Populate the RGB888 buffer
-                    *r++ = red_8bit;
+                    // Populate the GRB888 buffer
                     *r++ = green_8bit;
+                    *r++ = red_8bit;
                     *r++ = blue_8bit;
 
                     c[x] = f[x];
@@ -834,8 +834,8 @@ int main(int argc, char **argv)
         rfbRunEventLoop(RFB_Server, -1, TRUE);
         while (rfbIsActive(RFB_Server) )
         {
-            if ( RFB_Server->clientHead != NULL ) update_screen32();
-            // if ( RFB_Server->clientHead != NULL ) update_screen16();
+            // if ( RFB_Server->clientHead != NULL ) update_screen32();
+            if ( RFB_Server->clientHead != NULL ) update_screen16();
             else if (Target_fps > 0) usleep(1000 * 1000 / Target_fps);
             usleep(10 * 1000);   
         }
